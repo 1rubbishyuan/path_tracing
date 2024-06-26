@@ -1,0 +1,5 @@
+{ checkerTexture
+scale 0.35
+colorEven 0 1 0
+colorOdd 1 1 1
+}

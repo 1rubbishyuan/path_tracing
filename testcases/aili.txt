@@ -1,0 +1,4 @@
+{ 
+    imageTexture
+    imagefile testcases/aili.png
+}
