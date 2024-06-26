@@ -7,7 +7,7 @@ PerspectiveCamera {
     width 480
     height 480
     defocusAngle 0
-    focusDist 0
+    focusDist 1
 }
 
 Lights {

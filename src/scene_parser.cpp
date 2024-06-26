@@ -400,7 +400,8 @@ Texture *SceneParser::parseTexture(char *filename)
         // cout << filename << endl;
         ans = new ImageTexture(filename);
     }
-
+    fclose(textureFile);
+    textureFile = nullptr;
     return ans;
 }
 

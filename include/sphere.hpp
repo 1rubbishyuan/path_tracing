@@ -44,7 +44,6 @@ public:
     {
         // 判断r是否与这个球有交，并更新hit
         // std::cout << "k" << std::endl;
-        // cout << r.time << endl;
         this->center = isMoving ? centerFixed + r.time * moveVector : centerFixed;
         Vector3f l = this->center - r.getOrigin();
         Vector3f unit_direction = r.getDirection().normalized();
@@ -85,10 +84,9 @@ public:
         {
             // std::cout << "sphere_t: " << t << " " << length_l - this->radius << std::endl;
             h.set(t, this->material, n, r.pointAtParameter(t));
-            getUV((r.pointAtParameter(t) - this->center) / radius, h.u, h.v);
             if (this->material->isTextured())
             {
-                // cout << "as" << endl;
+                getUV((r.pointAtParameter(t) - this->center) / radius, h.u, h.v);
                 this->material->changeColorAccordingTexture(h.getU(), h.getV(), h.getPoint());
             }
 

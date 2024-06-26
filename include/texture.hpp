@@ -67,19 +67,19 @@ class ImageTexture : public Texture
 public:
     ImageTexture(char *image_filename)
     {
-        image = new RtwImage(image_filename);
+        imagee = new RtwImage(image_filename);
     };
     Vector3f getColor(float u, float v, Vector3f point) const override
     {
 
         v = 1 - v;
         // cout << u << " " << v << endl;
-        const unsigned char *pixel = image->getPixelDate(int(u * image->width()), int(v * image->height()));
+        const unsigned char *pixel = imagee->getPixelDate(int(u * imagee->width()), int(v * imagee->height()));
         return Vector3f(float(pixel[0]) / 255.0, float(pixel[1]) / 255.0, float(pixel[3] / 255.0));
     }
 
 private:
-    RtwImage *image;
+    RtwImage *imagee;
 };
 
 #endif

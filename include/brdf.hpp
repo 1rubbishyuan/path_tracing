@@ -58,16 +58,8 @@ public:
 class BaseBrdf
 {
 public:
-    BaseBrdf(float _alpha, float _F0) : alpha(_alpha), F0(_F0) {}
+    BaseBrdf() {}
     virtual float getBrdfValue(const Vector3f &incoming, const Vector3f &outgoing, const Vector3f &normal) = 0;
-    float getF0()
-    {
-        return this->F0;
-    }
-
-protected:
-    float alpha;
-    float F0;
 
 private:
 };
@@ -75,7 +67,7 @@ private:
 class cookTorrance : public BaseBrdf
 {
 public:
-    cookTorrance(float _alpha, float _F0) : BaseBrdf(_alpha, _F0) {}
+    cookTorrance(float _alpha, float _F0) : alpha(_alpha), F0(_F0) {}
     float schlickFresnel(float cosTheta, float F0)
     {
         return F0 + (1.0f - F0) * std::pow(1.0f - cosTheta, 5.0f);
@@ -115,5 +107,7 @@ public:
     }
 
 private:
+    float alpha;
+    float F0;
 };
 #endif

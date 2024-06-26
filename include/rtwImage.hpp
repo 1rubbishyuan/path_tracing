@@ -23,15 +23,15 @@ public:
         // STBI_FREE(fdata);
         delete[] fdata;
     }
-    bool load(std::string filename)
+    void load(std::string filename)
     {
         int n = bytesPerPixel;
-        fdata = stbi_loadf(filename.c_str(), &imageWidth, &imageHeight, &n, bytesPerPixel);
-        if (fdata == nullptr)
-            return false;
+        fdata = stbi_loadf(filename.c_str(), &this->imageWidth, &this->imageHeight, &n, bytesPerPixel);
+        // if (fdata == nullptr)
+        //     return false;
         bytesPerScanLine = imageWidth * bytesPerPixel;
         convert_to_bytes();
-        return true;
+        // return true;
     }
     int width()
     {
@@ -67,6 +67,7 @@ private:
         // data in the `bdata` member.
 
         int total_bytes = imageWidth * imageHeight * bytesPerPixel;
+        // cout << imageWidth << " " << imageHeight << endl;
         bdata = new unsigned char[total_bytes];
 
         // Iterate through all pixel components, converting from [0.0, 1.0] float values to

@@ -159,11 +159,6 @@ bool schlickApproximate(float cosTheta, float refractRate)
     // cout << generateRandomFloat(0, 1) << endl;
     return r0 + (1 - r0) * pow((1 - cosTheta), 5) > Utils::generateRandomFloat(0, 1);
 }
-
-float schlickFresnel(float cosTheta, float F0)
-{
-    return F0 + (1.0f - F0) * std::pow(1.0f - cosTheta, 5.0f);
-}
 Vector3f MonteCarloIntersectionColor(SceneParser *sceneparser, Ray &ray, Group *baseGroup, int depth, int lastHit)
 {
 
@@ -278,9 +273,7 @@ Vector3f MonteCarloIntersectionColor(SceneParser *sceneparser, Ray &ray, Group *
 
             Ray reflectedRay = Ray(hit.getPoint(), reflectedDirection.normalized(), ray.time);
             // finalColor += MonteCarloIntersectionColor(sceneparser, reflectedRay, baseGroup, depth + 1, hit.getHitObjectId());
-            float kr = schlickFresnel(Vector3f::dot(-ray.getDirection(), hit.getNormal()), hit.getMaterial()->getBrdf()->getF0());
-            // cout << kr << endl;
-            Vector3f newColor = (1 - kr) * float(1) / (depth + 1) * MonteCarloIntersectionColor(sceneparser, reflectedRay, baseGroup, depth + 1, hit.getHitObjectId());
+            Vector3f newColor = float(1) / (depth + 1) * MonteCarloIntersectionColor(sceneparser, reflectedRay, baseGroup, depth + 1, hit.getHitObjectId());
             if (lastHit != hit.getHitObjectId())
                 finalColor = Vector3f(finalColor.x() * newColor.x(), finalColor.y() * newColor.y(), finalColor.z() * newColor.z());
         }
@@ -289,7 +282,16 @@ Vector3f MonteCarloIntersectionColor(SceneParser *sceneparser, Ray &ray, Group *
     else
     {
         return sceneparser->getBackgroundColor();
+        // auto a = 0.5 * (ray.getDirection().y() + 1.0);
+        // return (1.0 - a) * Vector3f(1.0, 1.0, 1.0) + a * Vector3f(0.5, 0.7, 1.0);
     }
+    // finalColor.print();
+    // lightColor.print();
+    // (finalColor + lightColor).print();
+    // cout << "--" << endl;
+    // cout << "------------" << endl;
+    // finalColor.print();
+    // directColor.print();
     return finalColor + lightColor + directColor;
 }
 
@@ -304,15 +306,14 @@ Image MonteCarlo(SceneParser *sceneparser)
         {
             Group *baseGroup = sceneparser->getGroup();
             Vector3f finalColor;
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 300; i++)
             {
                 int s_x = x + Utils::generateRandomInt(-1, 1);
                 int s_y = y + Utils::generateRandomInt(-1, 1);
                 Ray camRay = sceneparser->getCamera()->generateRay(Vector2f(s_x, s_y)); // 有可能有问题
-                // cout << camRay.time << endl;
                 finalColor += MonteCarloIntersectionColor(sceneparser, camRay, baseGroup, 0, -1);
             }
-            finalColor = finalColor / 5;
+            finalColor = finalColor / 300;
             finalColor = Vector3f(sqrt(finalColor.x()), sqrt(finalColor.y()), sqrt(finalColor.z()));
             // finalColor.print();
             // finalColor.print();
