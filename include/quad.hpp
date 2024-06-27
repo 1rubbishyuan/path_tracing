@@ -20,6 +20,8 @@ public:
         AABB bbox1 = AABB(origin, origin + uVector + vVector);
         AABB bbox2 = AABB(origin + uVector, origin + vVector);
         bbox = AABB(bbox1, bbox2);
+        this->Id = num;
+        num++;
     }
     ~Quad() {}
     bool intersect(const Ray &r, Hit &h, float tmin, int type) override

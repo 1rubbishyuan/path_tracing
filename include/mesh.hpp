@@ -31,6 +31,7 @@ public:
     std::vector<TriangleIndex> t;
     std::vector<Object3D *> triangles;
     std::vector<Vector3f> n;
+    std::vector<Vector3f> verticeNormals;
     bool intersect(const Ray &r, Hit &h, float tmin, int type) override;
     BvhNode *meshRoot;
     AABB bbox;
@@ -38,7 +39,7 @@ public:
 
 private:
     // Normal can be used for light estimation
-    void computeNormal();
+    void computeNormal(int sum);
 };
 
 #endif

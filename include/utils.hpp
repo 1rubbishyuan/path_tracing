@@ -4,18 +4,25 @@
 #include <random>
 #include "Vector3f.h"
 using namespace std;
+static std::random_device rd;
+// 使用梅森旋转算法生成随机数引擎
+static std::mt19937 gen(rd());
+// 定义随机数分布范围
+static std::uniform_real_distribution<> dis;
+static std::uniform_int_distribution<> disi;
 class Utils
 {
 public:
     static int generateRandomInt(int min, int max)
     {
         // 使用随机设备生成种子
-        std::random_device rd;
-        // 使用梅森旋转算法生成随机数
-        std::mt19937 gen(rd());
-        // 定义随机数分布范围
-        std::uniform_int_distribution<> dis(min, max);
+        // std::random_device rd;
+        // // 使用梅森旋转算法生成随机数
+        // std::mt19937 gen(rd());
+        // // 定义随机数分布范围
+        // std::uniform_int_distribution<> dis(min, max);
         // 生成随机数
+        disi.param(std::uniform_int_distribution<>::param_type(min, max));
         int ans = dis(gen);
         // cout << ans << " ";
         return ans;
@@ -23,12 +30,13 @@ public:
 
     static float generateRandomFloat(float min, float max)
     {
-        // 使用随机设备生成种子
-        std::random_device rd;
-        // 使用梅森旋转算法生成随机数引擎
-        std::mt19937 gen(rd());
-        // 定义随机数分布范围
-        std::uniform_real_distribution<> dis(min, max);
+        // // 使用随机设备生成种子
+        // std::random_device rd;
+        // // 使用梅森旋转算法生成随机数引擎
+        // std::mt19937 gen(rd());
+        // // 定义随机数分布范围
+        // std::uniform_real_distribution<> dis(min, max);
+        dis.param(std::uniform_real_distribution<>::param_type(min, max));
         // 生成随机浮点数
         return dis(gen);
     }

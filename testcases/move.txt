@@ -31,6 +31,7 @@ Materials {
       perReflect 0
       perRefract 0
       lightColor 0.8 0.8 0.8
+      boost 3
     }
     Material { diffuseColor 0.12 0.45 0.15 
         perDiffuse 1
@@ -64,7 +65,7 @@ Materials {
 	shininess 20
     enableReflect 0
     enableRefract 1
-    refractRate 1.2
+    refractRate 2
     perDiffuse 0.02
     perReflect 0.02
     perRefract 0.96

@@ -179,7 +179,8 @@
 //         if (hit.getMaterial()->isALight())
 //         {
 //             // cout << 1 << endl;
-//             return hit.getMaterial()->getEmitColor();
+//             float boost = depth == 0 ? 1 : hit.getMaterial()->boost;
+//             return hit.getMaterial()->getEmitColor() * boost;
 //         }
 //         // if (hit.getNormal().z() > 0.8)
 //         // {
@@ -187,124 +188,89 @@
 //         //     lightPoint.print();
 //         //     line.print();
 //         // }
-//         for (int i = 0; i < lightGroup->lightsNum; i++)
-//         {
-//             Vector3f energy = Vector3f(1, 1, 1);
-//             bool getEnergy = false;
-//             Hit lhit;
-//             Vector3f lightPoint = lightGroup->lights[i]->randomFace();
-//             Vector3f startl = ray.pointAtParameter(hit.getT());
-//             Vector3f line = lightPoint - startl;
-//             Vector3f unit_line = line.normalized();
-//             Ray lray = Ray(startl, unit_line);
-//             bool isIntersectl = baseGroup->intersect(lray, lhit, 0.1, 1);
-//             // cout << "ss" << isIntersect << endl;
-//             // startl.print();
-//             // lightPoint.print();
-//             // line.print();
-//             // unit_line.print();
-//             // cout << isIntersect << " " << lhit.getT() << " " << line.length() << endl;
-
-//             if (isIntersectl && abs(lhit.getT() - line.length()) < 0.1)
-//             {
-
-//                 getEnergy = true;
-//                 // float brdfValue = Brdf::cookTorranceBRDF(ray.getDirection(), lray.getDirection(), hit.getNormal(), 0.6, 0.04);
-//                 float brdfValue = hit.getMaterial()->getBrdf()->getBrdfValue(ray.getDirection(), lray.getDirection(), hit.getNormal());
-//                 float distance = 1 / (line.length() * line.length());
-//                 // if (hit.getNormal().z() > 0.8)
-//                 // {
-//                 //     cout << "a: " << brdfValue << " " << endl;
-//                 //     ray.getDirection().print();
-//                 //     lray.getDirection().print();
-//                 //     hit.getNormal().print();
-//                 // }
-//                 // else
-//                 // {
-//                 //     cout << "b: " << brdfValue << endl;
-//                 // }
-//                 // cout << brdfValue << endl;
-//                 // lhit.getMaterial()->getEmitColor().print();
-//                 // energy.print();
-//                 energy = distance * (brdfValue + 1) * 20 * energy * lhit.getMaterial()->getEmitColor(); // * abs(Vector3f::dot(unit_line, lhit.getNormal()));
-//                 // energy.print();
-//             }
-//             if (!getEnergy)
-//             {
-//                 // if (!hit.getNormal().y() < -0.8)
-//                 //     cout << 1 << endl;
-//                 directColor = Vector3f::ZERO;
-//             }
-//             else
-//             {
-//                 // cout << "energy" << endl;
-//                 // energy.print();
-//                 // directColor += finalColor * energy;
-//                 directColor += (finalColor)*energy;
-//                 // directColor.print();
-//             }
-//         }
-
 //         float mid1 = hit.getMaterial()->getPerDiffuse();
 //         float mid2 = hit.getMaterial()->getPerReflect() + mid1;
 //         float mid = Utils::generateRandomFloat(0, 1);
 
 //         if (mid < mid1)
 //         {
+
+//             for (int i = 0; i < lightGroup->lightsNum; i++)
+//             {
+//                 Vector3f energy = Vector3f(1, 1, 1);
+//                 bool getEnergy = false;
+//                 Hit lhit;
+//                 Vector3f lightPoint = lightGroup->lights[i]->randomFace();
+//                 Vector3f startl = ray.pointAtParameter(hit.getT());
+//                 Vector3f line = lightPoint - startl;
+//                 Vector3f unit_line = line.normalized();
+//                 Ray lray = Ray(startl, unit_line, 0);
+//                 bool isIntersectl = baseGroup->intersect(lray, lhit, 0.01, 1);
+//                 if (isIntersectl && abs(lhit.getT() - line.length()) < 0.1)
+//                 {
+
+//                     getEnergy = true;
+//                     float brdfValue = hit.getMaterial()->getBrdf()->getBrdfValue(ray.getDirection(), lray.getDirection(), hit.getNormal());
+
+//                     float distance = 1 / (line.length() * line.length());
+//                     // energy = distance * brdfValue * energy * lhit.getMaterial()->getEmitColor(); // * abs(Vector3f::dot(unit_line, lhit.getNormal()));
+//                     float NdotL = max(0.0f, Vector3f::dot(hit.getNormal(), unit_line));
+//                     directColor += brdfValue * float(1) / (1 + depth) * finalColor * lhit.getMaterial()->getEmitColor() * distance * NdotL * 1500 * lhit.getMaterial()->boost;
+//                 }
+//             }
+
 //             Ray diffusedRay = getDifussionRay(hit, hit.getPoint());
-//             // float brdfValue = Brdf::cookTorranceBRDF(ray.getDirection(), diffusedRay.getDirection(), hit.getNormal(), 0.6, 0.04);
+//             diffusedRay.time = ray.time;
 //             float brdfValue = hit.getMaterial()->getBrdf()->getBrdfValue(ray.getDirection(), diffusedRay.getDirection(), hit.getNormal());
-//             Vector3f newColor = brdfValue * 5 * MonteCarloIntersectionColor(sceneparser, diffusedRay, baseGroup, depth + 1, hit.getHitObjectId());
-//             // cout << brdfValue << endl;
-//             // if (depth == 0)
-//             //     newColor.print();
-//             if (lastHit != hit.getHitObjectId())
-//                 finalColor = finalColor * newColor; //(finalColor.x() * newColor.x(), finalColor.y() * newColor.y(), finalColor.z() * newColor.z());
+//             float NdotV = max(0.0f, Vector3f::dot(hit.getNormal(), -ray.getDirection()));
+//             Vector3f newColor = 1000 * brdfValue * NdotV * float(1) / (depth + 1) * MonteCarloIntersectionColor(sceneparser, diffusedRay, baseGroup, depth + 1, hit.getHitObjectId());
+//             newColor = Utils::clampV(newColor);
+//             finalColor = finalColor * newColor; //(finalColor.x() * newColor.x(), finalColor.y() * newColor.y(), finalColor.z() * newColor.z());
 //         }
 //         else if (mid <= mid2)
 //         {
-//             Vector3f I = ray.getDirection().normalized();
-//             Vector3f N = hit.getNormal().normalized();
+//             Vector3f I = ray.getDirection();
+//             Vector3f N = hit.getNormal();
+//             directColor = Vector3f::ZERO;
 //             Vector3f reflectedDirection = (I - 2 * (Vector3f::dot(I, N)) * N + hit.getMaterial()->getFuzz() * Utils::random_v()).normalized();
-//             Ray reflectedRay = Ray(hit.getPoint(), reflectedDirection);
-//             float brdfValue = hit.getMaterial()->getBrdf()->getBrdfValue(ray.getDirection(), reflectedRay.getDirection(), hit.getNormal());
-//             Vector3f newColor = brdfValue * 5 * MonteCarloIntersectionColor(sceneparser, reflectedRay, baseGroup, depth + 1, hit.getHitObjectId());
-//             if (lastHit != hit.getHitObjectId())
-//                 finalColor = Vector3f(finalColor.x() * newColor.x(), finalColor.y() * newColor.y(), finalColor.z() * newColor.z());
+//             Ray reflectedRay = Ray(hit.getPoint(), reflectedDirection, ray.time);
+//             // float brdfValue = hit.getMaterial()->getBrdf()->getBrdfValue(ray.getDirection(), reflectedRay.getDirection(), hit.getNormal());
+//             // cout << brdfValue << endl;
+//             float NdotV = max(0.0f, Vector3f::dot(hit.getNormal(), -ray.getDirection()));
+//             Vector3f newColor = NdotV * float(1) / (depth + 1) * MonteCarloIntersectionColor(sceneparser, reflectedRay, baseGroup, depth + 1, hit.getHitObjectId());
+//             newColor = Utils::clampV(newColor);
+//             // newColor.print();
+//             // if (lastHit != hit.getHitObjectId())
+//             finalColor = Vector3f(finalColor.x() * newColor.x(), finalColor.y() * newColor.y(), finalColor.z() * newColor.z());
 //         }
 //         else
 //         {
-//             // cout << 1 << endl;
-//             Vector3f I = ray.getDirection().normalized();
-//             Vector3f N = hit.getNormal().normalized();
+//             Vector3f I = ray.getDirection();
+//             Vector3f N = hit.getNormal();
 //             float refract_rate = hit.getMaterial()->getRefractRate();
-//             if (lastHit == hit.getHitObjectId())
-//                 refract_rate = 1 / refract_rate;
-//             // refract_rate = hit.getLastMaterial()->getRefractRate() / hit.getMaterial()->getRefractRate();
-//             // Vector3f reflectedDirection;
-//             float c = Vector3f::dot(-I, N) / (I.length() * N.length());
-//             float s = sqrt(1.0 - c * c);
-//             // 折射率在两个面之间的变换没有实现
-//             // cout << s << " " << refract_rate << " " << refract_rate * s << endl;
-//             Vector3f reflectedDirection;
 
-//             // if (lastHit != hit.getHitObjectId())
-//             // 需要判断是否可以折射,如果结果是不可折射，则改为全反射
+//             float c = Vector3f::dot(-I, N); /// (I.length() * N.length());
+//             if (c > 0)
+//             {
+//                 // cout << lastHit << endl;
+//                 refract_rate = 1 / refract_rate;
+//             }
+//             float s = sqrt(1.0 - c * c);
+//             Vector3f reflectedDirection;
 //             if (refract_rate * s < 1 && !schlickApproximate(c, refract_rate))
 //                 reflectedDirection = -refract_rate * I + (refract_rate * (Vector3f::dot(I, N) - sqrt(1 - refract_rate * refract_rate * (1 - c * c))) * N);
 //             else
 //                 reflectedDirection = (I - 2 * (Vector3f::dot(I, N)) * N + hit.getMaterial()->getFuzz() * Utils::random_v()).normalized();
-//             // else
-//             // {
-//             //     refract_rate = 1 / refract_rate;
-//             //     reflectedDirection = -refract_rate * I + (refract_rate * (Vector3f::dot(I, N) - sqrt(1 - refract_rate * refract_rate * (1 - c * c))) * N);
-//             // }
-//             Ray reflectedRay = Ray(hit.getPoint(), reflectedDirection.normalized());
+
+//             Ray reflectedRay = Ray(hit.getPoint(), reflectedDirection.normalized(), ray.time);
 //             // finalColor += MonteCarloIntersectionColor(sceneparser, reflectedRay, baseGroup, depth + 1, hit.getHitObjectId());
-//             Vector3f newColor = MonteCarloIntersectionColor(sceneparser, reflectedRay, baseGroup, depth + 1, hit.getHitObjectId());
-//             if (lastHit != hit.getHitObjectId())
-//                 if (lastHit != hit.getHitObjectId())
-//                     finalColor = Vector3f(finalColor.x() * newColor.x(), finalColor.y() * newColor.y(), finalColor.z() * newColor.z());
+//             Vector3f newColor = float(1) / (depth + 1) * MonteCarloIntersectionColor(sceneparser, reflectedRay, baseGroup, depth + 1, hit.getHitObjectId());
+//             newColor = Utils::clampV(newColor);
+//             // if (lastHit != hit.getHitObjectId())
+//             finalColor = Vector3f(finalColor.x() * newColor.x(), finalColor.y() * newColor.y(), finalColor.z() * newColor.z());
+//             // newColor.print();
+//             // finalColor.print();
+//             // cout << "-----" << endl;
 //         }
 //         // }
 //     }
@@ -344,6 +310,7 @@
 //             }
 //             finalColor = finalColor / 5;
 //             finalColor = Vector3f(sqrt(finalColor.x()), sqrt(finalColor.y()), sqrt(finalColor.z()));
+//             // finalColor.print();
 //             // finalColor.print();
 //             image.SetPixel(x, y, finalColor);
 //             // cout << k++ << endl;

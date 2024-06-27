@@ -53,16 +53,30 @@ public:
 			}
 			if (t < hit.getT())
 			{
-				hit.set(t, this->material, this->normal, ray.pointAtParameter(t));
-				// if (type == 0)
-				// 	this->material->getDiffuseColor().print();
-				// if (this->material->isTextured())
-				// {
-				// 	getUV((ray.pointAtParameter(t) - this->center) / radius, h.u, h.v);
-				// 	this->material->changeColorAccordingTexture(h.getU(), h.getV(), h.getPoint());
-				// }
-				// cout << t << endl;
-				// cout << h.u << " " << h.v << endl;
+				Vector3f hitNormal;
+				Vector3f hitPoint = ray.pointAtParameter(t);
+				if (type != 1145)
+				{
+					hitNormal = this->normal;
+				}
+				else
+				{
+					float lambda1, lambda2, lambda3;
+					Vector3f v0 = vertices[1] - vertices[0];
+					Vector3f v1 = vertices[2] - vertices[0];
+					Vector3f v2 = hitPoint - vertices[0];
+					float d00 = Vector3f::dot(v0, v0);
+					float d01 = Vector3f::dot(v0, v1);
+					float d11 = Vector3f::dot(v1, v1);
+					float d20 = Vector3f::dot(v2, v0);
+					float d21 = Vector3f::dot(v2, v1);
+					float denom = d00 * d11 - d01 * d01;
+					lambda2 = (d11 * d20 - d01 * d21) / denom;
+					lambda3 = (d00 * d21 - d01 * d20) / denom;
+					lambda1 = 1 - lambda2 - lambda3;
+					hitNormal = (lambda1 * verticeNormals[0] + lambda2 * verticeNormals[1] + lambda3 * verticeNormals[2]).normalized();
+				}
+				hit.set(t, this->material, hitNormal, hitPoint);
 				hit.setObjectId(this->Id);
 				return true;
 			}
@@ -75,6 +89,13 @@ public:
 	}
 	Vector3f normal;
 	Vector3f vertices[3];
+	Vector3f verticeNormals[3];
+	void setVerticeNormals(Vector3f n1, Vector3f n2, Vector3f n3)
+	{
+		this->verticeNormals[0] = n1;
+		this->verticeNormals[1] = n2;
+		this->verticeNormals[2] = n3;
+	}
 	void getUV(Vector3f point, float &u, float &v) override
 	{
 	}
