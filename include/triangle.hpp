@@ -2,6 +2,7 @@
 #define TRIANGLE_H
 
 #include "object3d.hpp"
+#include "aabb.hpp"
 #include <vecmath.h>
 #include <cmath>
 #include <iostream>
@@ -21,6 +22,12 @@ public:
 		this->vertices[1] = b;
 		this->vertices[2] = c;
 		this->normal = Vector3f::cross(a - b, a - c).normalized();
+		AABB box1 = AABB(a, b);
+		AABB box2 = AABB(a, c);
+		this->bbox = AABB(box1, box2);
+		this->Id = 15;
+		// cout << this->Id << endl;
+		num++;
 	}
 
 	bool intersect(const Ray &ray, Hit &hit, float tmin, int type) override
@@ -29,7 +36,7 @@ public:
 		Vector3f e1 = vertices[0] - vertices[1];
 		Vector3f e2 = vertices[0] - vertices[2];
 		Vector3f s = vertices[0] - ray.getOrigin();
-		Vector3f unit_direction = ray.getDirection();
+		Vector3f unit_direction = ray.getDirection().normalized();
 		Matrix3f m1 = Matrix3f(s, e1, e2, true);
 		Matrix3f m2 = Matrix3f(unit_direction, s, e2, true);
 		Matrix3f m3 = Matrix3f(unit_direction, e1, s, true);
@@ -47,6 +54,16 @@ public:
 			if (t < hit.getT())
 			{
 				hit.set(t, this->material, this->normal, ray.pointAtParameter(t));
+				// if (type == 0)
+				// 	this->material->getDiffuseColor().print();
+				// if (this->material->isTextured())
+				// {
+				// 	getUV((ray.pointAtParameter(t) - this->center) / radius, h.u, h.v);
+				// 	this->material->changeColorAccordingTexture(h.getU(), h.getV(), h.getPoint());
+				// }
+				// cout << t << endl;
+				// cout << h.u << " " << h.v << endl;
+				hit.setObjectId(this->Id);
 				return true;
 			}
 			else
@@ -61,8 +78,13 @@ public:
 	void getUV(Vector3f point, float &u, float &v) override
 	{
 	}
+	AABB boundingBox() override
+	{
+		return this->bbox;
+	};
 
 protected:
+	AABB bbox;
 };
 
 #endif // TRIANGLE_H

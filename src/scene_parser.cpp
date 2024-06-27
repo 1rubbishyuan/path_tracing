@@ -421,6 +421,7 @@ Material *SceneParser::parseMaterial()
     float fuzz = 0;
     bool hasTexture = false;
     bool isLight = false;
+    float boost = 1;
     Texture *texture;
     BaseBrdf *brdf;
     getToken(token);
@@ -484,6 +485,10 @@ Material *SceneParser::parseMaterial()
             isLight = true;
             lightColor = readVector3f();
         }
+        else if (strcmp(token, "boost") == 0)
+        {
+            boost = readFloat();
+        }
         else if (strcmp(token, "cookTorrence") == 0)
         {
             Vector3f paras = readVector3f();
@@ -507,6 +512,7 @@ Material *SceneParser::parseMaterial()
     {
         answer = new LightMaterial(diffuseColor, specularColor, shininess, bool(enableReflect), bool(enableRefract), refractRate, perDiffuse, perReflect, perRefract, fuzz);
         answer->setLightColor(lightColor);
+        answer->boost = boost;
     }
     if (hasTexture)
     {

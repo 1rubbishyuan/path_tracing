@@ -52,19 +52,47 @@ public:
     }
     bool intersect(const Ray &ray, float tmin)
     {
-        const Vector3f &origin = ray.getOrigin();
-        const Vector3f &direction = ray.getDirection();
+        Vector3f origin = ray.getOrigin();
+        Vector3f direction = ray.getDirection().normalized();
+        float min = 0;
+        float max = 1e20;
         for (int i = 0; i < 3; i++)
         {
             const Interval ax = axis(i);
             float adinv = 1.0 / direction[i];
-            float t0 = (ax.min - direction[i]) * adinv;
-            float t1 = (ax.max - direction[i]) * adinv;
+            // cout << ax.min << " " << ax.max << endl;
+            // direction.print();
+            // origin.print();
+            // direction.print();
+            // cout << i << " " << adinv << " " << ax.min << " " << ax.max << endl;
+            float t0 = (ax.min - origin[i]) * adinv;
+            float t1 = (ax.max - origin[i]) * adinv;
+            // cout << t0 << " " << t1 << endl;
             if (t0 > t1)
             {
+                if (t1 > min)
+                    min = t1;
+                if (t0 < max)
+                    max = t0;
+            }
+            else
+            {
+                if (t0 > min)
+                    min = t0;
+                if (t1 < max)
+                    max = t1;
+            }
+            // cout << ray_t.max << endl;
+            if (min - max > 0.01)
+            {
+                // origin.print();
+                // direction.print();
+                // cout << min << " " << max << endl;
+                // cout << i << " " << adinv << " " << ax.min << " " << ax.max << endl;
                 return false;
             }
         }
+        // cout << t0 << " " << t1 << endl;
         return true;
     }
     Interval x, y, z;

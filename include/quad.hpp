@@ -19,7 +19,7 @@ public:
         w = mid / Vector3f::dot(mid, mid);
         AABB bbox1 = AABB(origin, origin + uVector + vVector);
         AABB bbox2 = AABB(origin + uVector, origin + vVector);
-        bbox1 = AABB(bbox1, bbox2);
+        bbox = AABB(bbox1, bbox2);
     }
     ~Quad() {}
     bool intersect(const Ray &r, Hit &h, float tmin, int type) override

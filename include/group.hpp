@@ -29,28 +29,27 @@ public:
 
     bool intersect(const Ray &r, Hit &h, float tmin, int type) override
     {
-        // cout << "---" << endl;
-        // bool is_intersect = false;
-        // for (int i = 0; i < this->num_objects; i++)
-        // {
-        //     // if (type == 1)
-        //     // {
-        //     //     cout << is_intersect << endl;
-        //     // }
-        //     // std::cout << i << std::endl;
-        //     if (!is_intersect)
-        //     {
-        //         is_intersect = all_object[i]->intersect(r, h, tmin, type);
-        //         // std::cout << i << std::endl;
-        //     }
-        //     else
-        //     {
-        //         bool m = all_object[i]->intersect(r, h, tmin, type);
-        //     }
-        //     // cout << h.getT() << endl;
-        // }
-        // return is_intersect;
-        return root->intersect(r, h, tmin, type);
+        bool is_intersect = false;
+        for (int i = 0; i < this->num_objects; i++)
+        {
+            // if (type == 1)
+            // {
+            //     cout << is_intersect << endl;
+            // }
+            // std::cout << i << std::endl;
+            if (!is_intersect)
+            {
+                is_intersect = all_object[i]->intersect(r, h, tmin, type);
+                // std::cout << i << std::endl;
+            }
+            else
+            {
+                bool m = all_object[i]->intersect(r, h, tmin, type);
+            }
+            // cout << h.getT() << endl;
+        }
+        return is_intersect;
+        // return root->intersect(r, h, tmin, type);
     }
 
     void addObject(int index, Object3D *obj)

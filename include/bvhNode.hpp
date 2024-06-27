@@ -54,6 +54,7 @@ public:
             left = new BvhNode(objects, start, mid);
             right = new BvhNode(objects, mid, end);
         }
+        bbox = AABB(left->boundingBox(), right->boundingBox());
     }
     static bool compareX(Object3D *obj0, Object3D *obj1)
     {
@@ -71,9 +72,10 @@ public:
     {
         if (!bbox.intersect(r, tmin))
         {
-            cout << 2 << endl;
+            // cout << 2 << endl;
             return false;
         }
+        // cout << 1 << endl;
         bool hitLeft = this->left->intersect(r, h, tmin, type);
         bool hitRight = this->right->intersect(r, h, tmin, type);
         return hitLeft || hitRight;

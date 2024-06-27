@@ -105,6 +105,7 @@ public:
     {
         return this->brdf;
     }
+    float boost;
 
 protected:
     Vector3f diffuseColor;

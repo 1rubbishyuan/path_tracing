@@ -179,7 +179,8 @@ Vector3f MonteCarloIntersectionColor(SceneParser *sceneparser, Ray &ray, Group *
         if (hit.getMaterial()->isALight())
         {
             // cout << 1 << endl;
-            return hit.getMaterial()->getEmitColor();
+            float boost = depth == 0 ? 1 : hit.getMaterial()->boost;
+            return hit.getMaterial()->getEmitColor() * boost;
         }
         // if (hit.getNormal().z() > 0.8)
         // {
@@ -204,16 +205,20 @@ Vector3f MonteCarloIntersectionColor(SceneParser *sceneparser, Ray &ray, Group *
                 Vector3f unit_line = line.normalized();
                 Ray lray = Ray(startl, unit_line, 0);
                 bool isIntersectl = baseGroup->intersect(lray, lhit, 0.1, 1);
-
                 if (isIntersectl && abs(lhit.getT() - line.length()) < 0.1)
                 {
 
                     getEnergy = true;
                     float brdfValue = hit.getMaterial()->getBrdf()->getBrdfValue(ray.getDirection(), lray.getDirection(), hit.getNormal());
+                    // if (hit.getHitObjectId() == 15)
+                    // {
+                    //     hit.getNormal().print();
+                    //     cout << isIntersectl << " " << lhit.getT() << " " << line.length() << " " << brdfValue << endl;
+                    // }
                     float distance = 1 / (line.length() * line.length());
                     // energy = distance * brdfValue * energy * lhit.getMaterial()->getEmitColor(); // * abs(Vector3f::dot(unit_line, lhit.getNormal()));
                     float NdotL = max(0.0f, Vector3f::dot(hit.getNormal(), unit_line));
-                    directColor += brdfValue * finalColor * lhit.getMaterial()->getEmitColor() * distance * NdotL * 1500;
+                    directColor += brdfValue * finalColor * lhit.getMaterial()->getEmitColor() * distance * NdotL * 1500 * lhit.getMaterial()->boost;
                 }
                 // if (!getEnergy)
                 // {
@@ -241,8 +246,8 @@ Vector3f MonteCarloIntersectionColor(SceneParser *sceneparser, Ray &ray, Group *
         }
         else if (mid <= mid2)
         {
-            Vector3f I = ray.getDirection().normalized();
-            Vector3f N = hit.getNormal().normalized();
+            Vector3f I = ray.getDirection();
+            Vector3f N = hit.getNormal();
             directColor = Vector3f::ZERO;
             Vector3f reflectedDirection = (I - 2 * (Vector3f::dot(I, N)) * N + hit.getMaterial()->getFuzz() * Utils::random_v()).normalized();
             Ray reflectedRay = Ray(hit.getPoint(), reflectedDirection, ray.time);
@@ -257,8 +262,8 @@ Vector3f MonteCarloIntersectionColor(SceneParser *sceneparser, Ray &ray, Group *
         }
         else
         {
-            Vector3f I = ray.getDirection().normalized();
-            Vector3f N = hit.getNormal().normalized();
+            Vector3f I = ray.getDirection();
+            Vector3f N = hit.getNormal();
             float refract_rate = hit.getMaterial()->getRefractRate();
             if (lastHit == hit.getHitObjectId())
                 refract_rate = 1 / refract_rate;
@@ -306,14 +311,14 @@ Image MonteCarlo(SceneParser *sceneparser)
         {
             Group *baseGroup = sceneparser->getGroup();
             Vector3f finalColor;
-            for (int i = 0; i < 300; i++)
+            for (int i = 0; i < 10; i++)
             {
                 int s_x = x + Utils::generateRandomInt(-1, 1);
                 int s_y = y + Utils::generateRandomInt(-1, 1);
                 Ray camRay = sceneparser->getCamera()->generateRay(Vector2f(s_x, s_y)); // 有可能有问题
                 finalColor += MonteCarloIntersectionColor(sceneparser, camRay, baseGroup, 0, -1);
             }
-            finalColor = finalColor / 300;
+            finalColor = finalColor / 10;
             finalColor = Vector3f(sqrt(finalColor.x()), sqrt(finalColor.y()), sqrt(finalColor.z()));
             // finalColor.print();
             // finalColor.print();

@@ -5,21 +5,22 @@
 #include <cstdlib>
 #include <utility>
 #include <sstream>
-
+#include "bvhNode.hpp"
 bool Mesh::intersect(const Ray &r, Hit &h, float tmin, int type)
 {
 
     // Optional: Change this brute force method into a faster one.
     // std::cout << "lll" << endl;
     bool result = false;
-    for (int triId = 0; triId < (int)t.size(); ++triId)
-    {
-        TriangleIndex &triIndex = t[triId];
-        Triangle triangle(v[triIndex[0]],
-                          v[triIndex[1]], v[triIndex[2]], material);
-        triangle.normal = n[triId];
-        result |= triangle.intersect(r, h, tmin, type);
-    }
+    // for (int triId = 0; triId < (int)t.size(); ++triId)
+    // {
+    //     // TriangleIndex &triIndex = t[triId];
+    //     // Triangle triangle(v[triIndex[0]],
+    //     //                   v[triIndex[1]], v[triIndex[2]], material);
+    //     // triangle.normal = n[triId];
+    //     result |= triangles[triId]->intersect(r, h, tmin, type);
+    // }
+    result = this->meshRoot->intersect(r, h, tmin, type);
     return result;
 }
 
@@ -100,6 +101,16 @@ Mesh::Mesh(const char *filename, Material *material) : Object3D(material)
     computeNormal();
 
     f.close();
+    for (int triId = 0; triId < (int)t.size(); ++triId)
+    {
+        TriangleIndex &triIndex = t[triId];
+        Triangle *triangle = new Triangle(v[triIndex[0]],
+                                          v[triIndex[1]], v[triIndex[2]], material);
+        triangle->normal = n[triId];
+        this->triangles.push_back(triangle);
+        this->bbox = AABB(this->bbox, triangle->boundingBox());
+    }
+    this->meshRoot = new BvhNode(triangles, 0, t.size() - 1);
 }
 
 void Mesh::computeNormal()

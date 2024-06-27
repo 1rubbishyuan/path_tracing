@@ -14,6 +14,8 @@ public:
     {
         origin = orig;
         direction = dir;
+        min = 0;
+        max = 1e20;
     }
 
     Ray(const Ray &r)
@@ -21,11 +23,15 @@ public:
         origin = r.origin;
         direction = r.direction;
         time = r.time;
+        min = 0;
+        max = 1e20;
     }
     Ray(const Vector3f &orig, const Vector3f &dir, float _time) : origin(orig), direction(dir)
     {
         // cout << _time << endl;
         this->time = _time;
+        min = 0;
+        max = 1e20;
     }
 
     const Vector3f &getOrigin() const
@@ -43,6 +49,8 @@ public:
         return origin + direction * t;
     }
     float time;
+    float min;
+    float max;
 
 private:
     Vector3f origin;

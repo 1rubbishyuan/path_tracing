@@ -10,7 +10,8 @@ mkdir -p output
 # build/PA1 testcases/bboxtest.txt output/bboxtest.bmp
 # build/PA1 testcases/test.txt output/test6.bmp
 # build/PA1 testcases/fieldDepth.txt output/fieldDepth.bmp
-build/PA1 testcases/move.txt output/move.bmp
+# build/PA1 testcases/move.txt output/move.bmp
+build/PA1 testcases/glossy.txt output/glossy.bmp
 # build/PA1 testcases/scene02_cube.txt output/scene02.bmp
 # build/PA1 testcases/scene03_sphere.txt output/scene03.bmp
 # build/PA1 testcases/scene04_axes.txt output/scene04.bmp
