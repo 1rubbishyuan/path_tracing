@@ -38,7 +38,11 @@ public:
         this->evenTexture = new SolidColor(colorEven);
         this->oddTexture = new SolidColor(colorOdd);
     }
-
+    ~CheckerTexture()
+    {
+        delete evenTexture;
+        delete oddTexture;
+    }
     Vector3f getColor(float u, float v, Vector3f point) const override
     {
         // cout << 1 << endl;
@@ -69,17 +73,45 @@ public:
     {
         imagee = new RtwImage(image_filename);
     };
+    ~ImageTexture()
+    {
+        delete imagee;
+    }
     Vector3f getColor(float u, float v, Vector3f point) const override
     {
 
         v = 1 - v;
         // cout << u << " " << v << endl;
         const unsigned char *pixel = imagee->getPixelDate(int(u * imagee->width()), int(v * imagee->height()));
-        return Vector3f(float(pixel[0]) / 255.0, float(pixel[1]) / 255.0, float(pixel[3] / 255.0));
+        return Vector3f(float(pixel[0]) / 255.0, float(pixel[1]) / 255.0, float(pixel[2] / 255.0));
     }
 
 private:
     RtwImage *imagee;
 };
 
+class NTexture : public Texture
+{
+public:
+    NTexture(char *image_filename)
+    {
+        imagee = new RtwImage(image_filename);
+    };
+    ~NTexture()
+    {
+        delete imagee;
+    }
+    Vector3f getColor(float u, float v, Vector3f point) const override
+    {
+
+        v = 1 - v;
+        // cout << u << " " << v << endl;
+        const unsigned char *pixel = imagee->getPixelDate(int(u * imagee->width()), int(v * imagee->height()));
+        // cout << float(pixel[0]) << " " << float(pixel[1]) << " " << float(pixel[2]) << endl;
+        return Vector3f(float(pixel[0]) / 255.0, float(pixel[1]) / 255.0, float(pixel[2] / 255.0));
+    }
+
+private:
+    RtwImage *imagee;
+};
 #endif

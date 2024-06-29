@@ -73,7 +73,12 @@ public:
         }
         CurvePoint ans;
         ans.V = V;
-        ans.T = T.normalized();
+        ans.T = T;
+        for (int i = 0; i < n; i++)
+        {
+            delete[] B[i];
+        }
+        delete[] B;
         return ans;
     }
 
@@ -134,7 +139,12 @@ public:
         }
         CurvePoint ans;
         ans.V = V;
-        ans.T = T.normalized();
+        ans.T = T;
+        for (int i = 0; i < n; i++)
+        {
+            delete[] B[i];
+        }
+        delete[] B;
         return ans;
     }
 
@@ -150,9 +160,8 @@ private:
 class Curve : public Object3D
 {
 protected:
-    std::vector<Vector3f> controls;
-
 public:
+    std::vector<Vector3f> controls;
     explicit Curve(std::vector<Vector3f> points) : controls(std::move(points)) {}
 
     bool intersect(const Ray &r, Hit &h, float tmin, int type) override
@@ -164,7 +173,7 @@ public:
     {
         return controls;
     }
-
+    virtual CurvePoint evaluate(float u) { return CurvePoint(); }
     virtual void discretize(int resolution, std::vector<CurvePoint> &data) = 0;
 };
 
@@ -187,6 +196,10 @@ public:
         {
             data.push_back(b.evaluate(float(i) / resolution));
         }
+    }
+    CurvePoint evaluate(float u) override
+    {
+        return b.evaluate(u);
     }
 
 protected:
@@ -214,6 +227,10 @@ public:
             if (i >= resolution * 3 && i <= resolution * getControls().size())
                 data.push_back(b.evaluate(float(i) / (resolution * (getControls().size() + 3 + 1))));
         }
+    }
+    CurvePoint evaluate(float u) override
+    {
+        return b.evaluate(u);
     }
 
 protected:

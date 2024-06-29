@@ -1,0 +1,4 @@
+{
+    imageTexture
+    imagefile testcases/earth.png
+}

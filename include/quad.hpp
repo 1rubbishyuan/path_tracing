@@ -32,7 +32,11 @@ public:
                   (judge);
         // if (type == 1)
         //     cout << t << endl;
-        if (judge > 0)
+        // if (type == 12)
+        // {
+        //     cout << judge << endl;
+        // }
+        if (judge > 0 && type != 12)
         {
             return false;
         }
@@ -59,6 +63,21 @@ public:
             // {
             //     r.pointAtParameter(t).print();
             // }
+            if (this->material->hasNTexture)
+            {
+                Vector3f nInfo = this->material->getNinfo(h.getU(), h.getV());
+                // nInfo.print();
+                nInfo = (2 * nInfo - Vector3f(1, 1, 1)).normalized();
+                Vector3f on = n;
+                n = nInfo[0] * uVector.normalized() + nInfo[1] * vVector.normalized() + nInfo[2] * n;
+                if (Vector3f::dot(on, n) < 0)
+                {
+                    // n.print();
+                    // (255 * (nInfo + Vector3f(1, 1, 1)) / 2).print();
+                    n = -n;
+                }
+                n = n.normalized();
+            }
             h.set(t, this->material, n, r.pointAtParameter(t));
             if (this->material->isTextured())
             {

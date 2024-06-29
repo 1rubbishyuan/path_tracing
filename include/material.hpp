@@ -24,6 +24,7 @@ public:
     {
         hasTexture = false;
         isLight = false;
+        hasNTexture = false;
     }
     virtual ~Material() = default;
 
@@ -106,6 +107,16 @@ public:
         return this->brdf;
     }
     float boost;
+    void setNTexture(Texture *_texture)
+    {
+        this->hasNTexture = true;
+        this->ntexture = _texture;
+    }
+    Vector3f getNinfo(float u, float v)
+    {
+        return ntexture->getColor(u, v, Vector3f::ZERO);
+    }
+    bool hasNTexture;
 
 protected:
     Vector3f diffuseColor;
@@ -123,6 +134,7 @@ protected:
     float fuzz;
     Vector3f lightColor;
     BaseBrdf *brdf;
+    Texture *ntexture;
 };
 
 class LightMaterial : public Material

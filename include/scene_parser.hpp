@@ -17,6 +17,8 @@ class Transform;
 class Mesh;
 class Texture;
 class Quad;
+class Curve;
+class RevSurface;
 #define MAX_PARSER_TOKEN_LENGTH 1024
 
 class SceneParser
@@ -87,6 +89,9 @@ private:
     Texture *parseTexture(char *filename);
     Quad *parseQuad();
     LightGroup *parseLightGroup();
+    Curve *parseBezierCurve();
+    Curve *parseBsplineCurve();
+    RevSurface *parseRevSurface();
     int getToken(char token[MAX_PARSER_TOKEN_LENGTH]);
 
     Vector3f readVector3f();

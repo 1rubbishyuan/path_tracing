@@ -18,6 +18,8 @@
 #include "texture.hpp"
 #include "quad.hpp"
 #include "brdf.hpp"
+#include "curve.hpp"
+#include "revsurface.hpp"
 #define DegreesToRadians(x) ((M_PI * x) / 180.0f)
 
 SceneParser::SceneParser(const char *filename)
@@ -400,6 +402,26 @@ Texture *SceneParser::parseTexture(char *filename)
         // cout << filename << endl;
         ans = new ImageTexture(filename);
     }
+    else if (strcmp(token, "nTexture") == 0)
+    {
+        char filename[MAX_PARSER_TOKEN_LENGTH];
+        while (true)
+        {
+            getTokenInFile(token, textureFile);
+            if (strcmp(token, "imagefile") == 0)
+            {
+                getTokenInFile(filename, textureFile);
+                // filename = std::string(token);
+            }
+            else
+            {
+                assert(!strcmp(token, "}"));
+                break;
+            }
+        }
+        // cout << filename << endl;
+        ans = new NTexture(filename);
+    }
     fclose(textureFile);
     textureFile = nullptr;
     return ans;
@@ -422,7 +444,9 @@ Material *SceneParser::parseMaterial()
     bool hasTexture = false;
     bool isLight = false;
     float boost = 1;
+    bool hasNtexture = false;
     Texture *texture;
+    Texture *nTexture;
     BaseBrdf *brdf;
     getToken(token);
     assert(!strcmp(token, "{"));
@@ -480,6 +504,12 @@ Material *SceneParser::parseMaterial()
             texture = parseTexture(filename);
             hasTexture = true;
         }
+        else if (strcmp(token, "nTexture") == 0)
+        {
+            getToken(filename);
+            nTexture = parseTexture(filename);
+            hasNtexture = true;
+        }
         else if (strcmp(token, "lightColor") == 0)
         {
             isLight = true;
@@ -518,11 +548,111 @@ Material *SceneParser::parseMaterial()
     {
         answer->setTexture(texture);
     }
+    if (hasNtexture)
+    {
+        answer->setNTexture(nTexture);
+    }
+    return answer;
+}
+Curve *SceneParser::parseBezierCurve()
+{
+    char token[MAX_PARSER_TOKEN_LENGTH];
+    getToken(token);
+    assert(!strcmp(token, "{"));
+    getToken(token);
+    assert(!strcmp(token, "controls"));
+    vector<Vector3f> controls;
+    while (true)
+    {
+        getToken(token);
+        if (!strcmp(token, "["))
+        {
+            controls.push_back(readVector3f());
+            getToken(token);
+            assert(!strcmp(token, "]"));
+        }
+        else if (!strcmp(token, "}"))
+        {
+            break;
+        }
+        else
+        {
+            printf("Incorrect format for BezierCurve!\n");
+            exit(0);
+        }
+    }
+    Curve *answer = new BezierCurve(controls);
+    return answer;
+}
+
+Curve *SceneParser::parseBsplineCurve()
+{
+    char token[MAX_PARSER_TOKEN_LENGTH];
+    getToken(token);
+    assert(!strcmp(token, "{"));
+    getToken(token);
+    assert(!strcmp(token, "controls"));
+    vector<Vector3f> controls;
+    while (true)
+    {
+        getToken(token);
+        if (!strcmp(token, "["))
+        {
+            controls.push_back(readVector3f());
+            getToken(token);
+            assert(!strcmp(token, "]"));
+        }
+        else if (!strcmp(token, "}"))
+        {
+            break;
+        }
+        else
+        {
+            printf("Incorrect format for BsplineCurve!\n");
+            exit(0);
+        }
+    }
+    Curve *answer = new BsplineCurve(controls);
     return answer;
 }
 
 // ====================================================================
 // ====================================================================
+RevSurface *SceneParser::parseRevSurface()
+{
+    char token[MAX_PARSER_TOKEN_LENGTH];
+    getToken(token);
+    assert(!strcmp(token, "{"));
+    getToken(token);
+    assert(!strcmp(token, "axis"));
+    Vector3f axis = readVector3f();
+    getToken(token);
+    assert(!strcmp(token, "center"));
+    Vector3f center = readVector3f();
+    getToken(token);
+    assert(!strcmp(token, "profile"));
+    Curve *profile;
+    getToken(token);
+    if (!strcmp(token, "BezierCurve"))
+    {
+        profile = parseBezierCurve();
+    }
+    else if (!strcmp(token, "BsplineCurve"))
+    {
+        profile = parseBsplineCurve();
+    }
+    else
+    {
+        printf("Unknown profile type in parseRevSurface: '%s'\n", token);
+        exit(0);
+    }
+    getToken(token);
+    assert(!strcmp(token, "}"));
+    auto *answer = new RevSurface(profile, current_material);
+    answer->setAxis(axis);
+    answer->setCenter(center);
+    return answer;
+}
 
 Object3D *SceneParser::parseObject(char token[MAX_PARSER_TOKEN_LENGTH])
 {
@@ -554,6 +684,10 @@ Object3D *SceneParser::parseObject(char token[MAX_PARSER_TOKEN_LENGTH])
     else if (!strcmp(token, "Quad"))
     {
         answer = (Object3D *)parseQuad();
+    }
+    else if (!strcmp(token, "RevSurface"))
+    {
+        answer = (Object3D *)parseRevSurface();
     }
     else
     {

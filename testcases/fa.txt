@@ -1,0 +1,4 @@
+{ 
+    nTexture
+    imagefile testcases/fafa.jpg
+}

@@ -56,6 +56,11 @@ public:
         }
         bbox = AABB(left->boundingBox(), right->boundingBox());
     }
+    ~BvhNode()
+    {
+        // delete left;
+        // delete right;
+    }
     static bool compareX(Object3D *obj0, Object3D *obj1)
     {
         return obj0->boundingBox().x.min < obj1->boundingBox().x.min;

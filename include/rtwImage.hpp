@@ -17,12 +17,7 @@ public:
         // cout << image_filename << endl;
         load(std::string(image_filename));
     }
-    ~RtwImage()
-    {
-        delete[] bdata;
-        // STBI_FREE(fdata);
-        delete[] fdata;
-    }
+    ~RtwImage();
     void load(std::string filename)
     {
         int n = bytesPerPixel;
