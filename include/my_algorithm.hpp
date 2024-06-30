@@ -19,6 +19,7 @@
 #include <future>
 #include <vector>
 #include <omp.h>
+#include <ctime>
 using namespace std;
 
 // bool isShadow(int x, int y, SceneParser *sceneparser)
@@ -166,10 +167,11 @@ bool schlickApproximate(float cosTheta, float refractRate)
 Vector3f MonteCarloIntersectionColor(SceneParser *sceneparser, Ray &ray, Group *baseGroup, int depth, int lastHit)
 {
 
-    float p = 0.9;
+    float p = 0.8;
     float rr = Utils::generateRandomFloat(0, 1);
-    if (depth >= 40 || rr > p)
+    if (rr > p)
     {
+        // cout << depth << endl;
         return Vector3f(0, 0, 0);
     }
     Hit hit;
@@ -332,10 +334,12 @@ Vector3f sample(int x, int y, SceneParser *sceneparser, Group *baseGroup)
 
 Image MonteCarlo(SceneParser *sceneparser)
 {
+    clock_t start = clock();
     Camera *camera = sceneparser->getCamera();
     Image image = Image(camera->getWidth(), camera->getHeight());
     int k = 0;
-#pragma omp parallel for num_threads(8)
+    int sample_times = 100;
+#pragma omp parallel for num_threads(4)
     for (int x = 0; x < camera->getWidth(); ++x)
     {
         for (int y = 0; y < camera->getHeight(); ++y)
@@ -344,36 +348,20 @@ Image MonteCarlo(SceneParser *sceneparser)
             vector<thread> threads;
             Group *baseGroup = sceneparser->getGroup();
             Vector3f finalColor;
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < sample_times; i++)
             {
-
-                // {
-                //     packaged_task<Vector3f(int, int, SceneParser *, Group *)> task(sample);
-                //     futures.push_back(task.get_future());
-                //     threads.emplace_back(move(task), x, y, sceneparser, baseGroup);
-                // }
                 int s_x = x + Utils::generateRandomInt(-1, 1);
                 int s_y = y + Utils::generateRandomInt(-1, 1);
                 Ray camRay = sceneparser->getCamera()->generateRay(Vector2f(s_x, s_y)); // 有可能有问题
                 finalColor += MonteCarloIntersectionColor(sceneparser, camRay, baseGroup, 0, 0);
             }
-            // for (int i = 0; i < 100; ++i)
-            // {
-            //     futures.push_back(std::async(std::launch::async, sample, x, y, sceneparser, baseGroup));
-            // // }
-
-            // for (auto &fut : futures)
-            // {
-            //     finalColor += fut.get();
-            // }
-            finalColor = finalColor / 100;
+            finalColor = finalColor / sample_times;
             finalColor = Vector3f(sqrt(finalColor.x()), sqrt(finalColor.y()), sqrt(finalColor.z()));
-            // finalColor.print();
-            // finalColor.print();
             image.SetPixel(x, y, finalColor);
-            // cout << k++ << endl;
         }
     }
+    clock_t end = clock();
+    cout << "time: " << (end - start) / CLOCKS_PER_SEC << "s" << endl;
     return image;
 }
 

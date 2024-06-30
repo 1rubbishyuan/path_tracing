@@ -4,8 +4,8 @@ PerspectiveCamera {
     direction 0 0 -1
     up 0 1 0
     angle 30
-    width 480
-    height 480
+    width 1080
+    height 1080
     defocusAngle 0.5
     focusDist 13
 }
